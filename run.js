@@ -1,11 +1,6 @@
 let fs = require('fs')
 let handler = require('./handler')
 
-var filename = './example-simple.html'
-
-var fd = fs.openSync(filename, 'r');
-var bufferSize = 1;
-var buffer = Buffer.alloc(bufferSize);
 
 let slider = []
 
@@ -29,7 +24,7 @@ let end_tagname = ''
 let autoCloseTag = {'meta':1, 'link':1}
 
 let prevChar;
-let parseHtml = (char)=>{
+let parseHtml = (char, fultureStr)=>{
     slider.push(char)
     if(slider.length > 50) slider.shift();
     if(char === '<') inside_tag = true;
@@ -69,7 +64,7 @@ let parseHtml = (char)=>{
         // if(autoCloseTag[start_tagname.toLowerCase()]){
         //     handler.on({ename: 'end_tag', tagname: start_tagname});
         // }
-        jsonBuilder(start_tagname,  'start')
+        //jsonBuilder(start_tagname,  'start')
         current_tagname = start_tagname;
         start_tagname = ''
     }
@@ -86,7 +81,7 @@ let parseHtml = (char)=>{
         inside_end_tag = false;
         end_tagname = end_tagname.replace(/^\//, '')
         end_tagarr.push(end_tagname);
-        jsonBuilder(end_tagname,  'end')
+        //jsonBuilder(end_tagname,  'end')
         handler.on({ename: 'end_tag', tagname: end_tagname});
         current_tagname = end_tagname;
         end_tagname = '';
@@ -98,24 +93,37 @@ let parseHtml = (char)=>{
         end_stop = false;
         inside_end_tag = false;
         end_tagarr.push(selfclose_tag);
-        jsonBuilder(selfclose_tag,  'end')
+        //jsonBuilder(selfclose_tag,  'end')
         handler.on({ename: 'end_tag', tagname: selfclose_tag});
     }
 
     prevChar = char;
 }
 
-let htmlJson = {}
-let jsonBuilder = (tagname, pos)=>{
 
-}
+var filename = './example-simple.html'
+//filename = `./a.txt`
 
+var fd = fs.openSync(filename, 'r');
+var bufferSize = 1;
+var buffer = Buffer.alloc(bufferSize);
 var leftOver = '';
 var read, line, idxStart, idx;
+let fultureArr = []//往前看10个
 while ((read = fs.readSync(fd, buffer, 0, bufferSize, null)) !== 0) {
   let b = buffer.toString('utf8');//buffer.toString('utf8', 0, read);
   //console.log( b)
-  parseHtml(b);
+  fultureArr.push(b)
+  if(fultureArr.length > 10) {
+      let char = fultureArr.shift();
+      console.log(char, fultureArr.join(''))
+      parseHtml(char, fultureArr.join(''))
+  }
+}
+while(fultureArr.length > 0){
+    let char = fultureArr.shift();
+    console.log(char, fultureArr.join(''))
+    parseHtml(char, fultureArr.join(''))
 }
 
 fs.writeFileSync('./_start_.log', start_tagarr.join('\n'))
