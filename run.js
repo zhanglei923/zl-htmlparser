@@ -139,6 +139,7 @@ let parseHtml = (char, fultureStr)=>{
 
 
 var filename = './example-simple.html'
+filename = './example-complex.html'
 //filename = `./a.txt`
 
 var fd = fs.openSync(filename, 'r');
