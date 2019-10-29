@@ -33,8 +33,6 @@ let parseHtml = (char, fultureStr)=>{
     //console.log('--->', char)
     slider.push(char)
     if(slider.length > 50) slider.shift();
-    if(char === '<') inside_tag = true;
-    if(prevChar === '>') inside_tag = false;
     if(!inside_string && char.match(/['|"]/)) {
         current_quote = char;
         current_string = '';
@@ -51,6 +49,8 @@ let parseHtml = (char, fultureStr)=>{
         inside_string = false;
     }
     if(!inside_string){
+        if(char === '<') inside_tag = true;
+        if(prevChar === '>') inside_tag = false;
         //<tag ...
         if(prevChar === '<' && char !== '/') {
             inside_start_tag = true;
