@@ -61,7 +61,8 @@ let parseHtml = (char, fultureStr)=>{
         inside_start_tag = false;
         start_tagarr.push(start_tagname);
         handler.on({ename: 'start_tag', tagname: start_tagname});        
-        // if(autoCloseTag[start_tagname.toLowerCase()]){
+        // if(autoCloseTag[start_tagname.toLowerCase()] && fultureStr.indexOf(`</${start_tagname}>`)<0 && fultureStr.indexOf('/>')<0){
+        //     console.log(fultureStr)
         //     handler.on({ename: 'end_tag', tagname: start_tagname});
         // }
         //jsonBuilder(start_tagname,  'start')
@@ -116,13 +117,13 @@ while ((read = fs.readSync(fd, buffer, 0, bufferSize, null)) !== 0) {
   fultureArr.push(b)
   if(fultureArr.length > 10) {
       let char = fultureArr.shift();
-      console.log(char, fultureArr.join(''))
+      //console.log(char, fultureArr.join(''))
       parseHtml(char, fultureArr.join(''))
   }
 }
 while(fultureArr.length > 0){
     let char = fultureArr.shift();
-    console.log(char, fultureArr.join(''))
+    //console.log(char, fultureArr.join(''))
     parseHtml(char, fultureArr.join(''))
 }
 
