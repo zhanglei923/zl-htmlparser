@@ -50,75 +50,77 @@ let parseHtml = (char, fultureStr)=>{
         current_string = null;
         inside_string = false;
     }
-    //<tag ...
-    if(prevChar === '<' && char !== '/') {
-        inside_start_tag = true;
-        inside_end_tag = false;
-    } 
-    //</tag>
-    if(prevChar === '<' && char === '/'){
-        inside_start_tag = false;
-        inside_end_tag = true;
-    }
-    //<tag/>
-    if(inside_tag &&(prevChar === '/' && char === '>')){
-        // inside_start_tag = false;
-        // inside_end_tag = false;
-        inside_self_closing_tag = true;
-    }
+    if(!inside_string){
+        //<tag ...
+        if(prevChar === '<' && char !== '/') {
+            inside_start_tag = true;
+            inside_end_tag = false;
+        } 
+        //</tag>
+        if(prevChar === '<' && char === '/'){
+            inside_start_tag = false;
+            inside_end_tag = true;
+        }
+        //<tag/>
+        if(inside_tag &&(prevChar === '/' && char === '>')){
+            // inside_start_tag = false;
+            // inside_end_tag = false;
+            inside_self_closing_tag = true;
+        }
 
-    //if(char === '>') inside_start_tag = true;
-    let start_stop = false;
-    if(inside_start_tag && (char === ' ' || char === '/')){
-        start_stop = true;
-    }else if(inside_start_tag && char === '>') {
-        start_stop = true;
-    }
-    if(inside_start_tag && !start_stop){
-        start_tagname += char;
-    }
-    if(inside_start_tag && start_stop){
-        start_stop = false;
-        inside_start_tag = false;
-        start_tagarr.push(start_tagname);
-        handler.on({ename: 'start_tag', tagname: start_tagname});        
-        // if(autoCloseTag[start_tagname.toLowerCase()] && fultureStr.indexOf(`</${start_tagname}>`)<0 && fultureStr.indexOf('/>')<0){
-        //     console.log(fultureStr)
-        //     handler.on({ename: 'end_tag', tagname: start_tagname});
-        // }
-        //jsonBuilder(start_tagname,  'start')
-        current_tagname = start_tagname;
-        start_tagname = ''
-    }
+        //if(char === '>') inside_start_tag = true;
+        let start_stop = false;
+        if(inside_start_tag && (char === ' ' || char === '/')){
+            start_stop = true;
+        }else if(inside_start_tag && char === '>') {
+            start_stop = true;
+        }
+        if(inside_start_tag && !start_stop){
+            start_tagname += char;
+        }
+        if(inside_start_tag && start_stop){
+            start_stop = false;
+            inside_start_tag = false;
+            start_tagarr.push(start_tagname);
+            handler.on({ename: 'start_tag', tagname: start_tagname});        
+            // if(autoCloseTag[start_tagname.toLowerCase()] && fultureStr.indexOf(`</${start_tagname}>`)<0 && fultureStr.indexOf('/>')<0){
+            //     console.log(fultureStr)
+            //     handler.on({ename: 'end_tag', tagname: start_tagname});
+            // }
+            //jsonBuilder(start_tagname,  'start')
+            current_tagname = start_tagname;
+            start_tagname = ''
+        }
 
-    let end_stop = false;
-    if(inside_end_tag && char === '>'){
-        end_stop = true;
-    }
-    if(inside_end_tag && !end_stop){
-        end_tagname += char;
-    }
-    if(inside_end_tag && end_stop){
-        end_stop = false;
-        inside_end_tag = false;
-        end_tagname = end_tagname.replace(/^\//, '')
-        end_tagarr.push(end_tagname);
-        //jsonBuilder(end_tagname,  'end')
-        handler.on({ename: 'end_tag', tagname: end_tagname});
-        current_tagname = end_tagname;
-        end_tagname = '';
-    }
+        let end_stop = false;
+        if(inside_end_tag && char === '>'){
+            end_stop = true;
+        }
+        if(inside_end_tag && !end_stop){
+            end_tagname += char;
+        }
+        if(inside_end_tag && end_stop){
+            end_stop = false;
+            inside_end_tag = false;
+            end_tagname = end_tagname.replace(/^\//, '')
+            end_tagarr.push(end_tagname);
+            //jsonBuilder(end_tagname,  'end')
+            handler.on({ename: 'end_tag', tagname: end_tagname});
+            current_tagname = end_tagname;
+            end_tagname = '';
+        }
 
-    if(inside_self_closing_tag){
-        inside_self_closing_tag = false;
-        let selfclose_tag = current_tagname;
-        end_stop = false;
-        inside_end_tag = false;
-        end_tagarr.push(selfclose_tag);
-        //jsonBuilder(selfclose_tag,  'end')
-        handler.on({ename: 'end_tag', tagname: selfclose_tag});
+        if(inside_self_closing_tag){
+            inside_self_closing_tag = false;
+            let selfclose_tag = current_tagname;
+            end_stop = false;
+            inside_end_tag = false;
+            end_tagarr.push(selfclose_tag);
+            //jsonBuilder(selfclose_tag,  'end')
+            handler.on({ename: 'end_tag', tagname: selfclose_tag});
+        }
     }
-
+    
     prevChar = char;
 }
 
