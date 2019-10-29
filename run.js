@@ -10,8 +10,13 @@ let inside_tag = false;
 
 let inside_start_tag = false;
 let inside_end_tag = false;
+
 let inside_comment = false;
+
 let inside_string = false;
+let current_quote;
+let current_string;
+let stringarr = []
 
 let current_tagname;
 
@@ -24,11 +29,27 @@ let end_tagname = ''
 let autoCloseTag = {'meta':1, 'link':1}
 
 let prevChar;
-let parseHtml = (char, fultureStr)=>{
+let parseHtml = (char, fultureStr)=>{    
+    //console.log('--->', char)
     slider.push(char)
     if(slider.length > 50) slider.shift();
     if(char === '<') inside_tag = true;
     if(prevChar === '>') inside_tag = false;
+    if(!inside_string && char.match(/['|"]/)) {
+        current_quote = char;
+        current_string = '';
+        inside_string = true;
+    }else if(inside_string && char.match(/['|"]/) && prevChar !== '\\'){
+        inside_string = false;
+    }
+    if(inside_string){
+        current_string += char;
+    }
+    if(!inside_string && current_string){
+        stringarr.push(current_string.substring(1));
+        current_string = null;
+        inside_string = false;
+    }
     //<tag ...
     if(prevChar === '<' && char !== '/') {
         inside_start_tag = true;
@@ -106,21 +127,26 @@ var filename = './example-simple.html'
 //filename = `./a.txt`
 
 var fd = fs.openSync(filename, 'r');
-var bufferSize = 1;
+var bufferSize = 16;//为了非英文，必须为16，过小 容易乱码
 var buffer = Buffer.alloc(bufferSize);
 var leftOver = '';
 var read, line, idxStart, idx;
 let fultureArr = []//往前看10个
 while ((read = fs.readSync(fd, buffer, 0, bufferSize, null)) !== 0) {
-  let b = buffer.toString('utf8');//buffer.toString('utf8', 0, read);
-  //console.log( b)
-  fultureArr.push(b)
-  if(fultureArr.length > 10) {
-      let char = fultureArr.shift();
-      //console.log(char, fultureArr.join(''))
-      parseHtml(char, fultureArr.join(''))
+  let b = buffer.toString('utf8', 0, read);
+  //console.log('--->',b)
+  for(let i=0;i<b.length;i++){
+    let char = b[i];
+    //console.log('~~~~>', char)
+    fultureArr.push(char)
+    if(fultureArr.length > 10) {
+        let char = fultureArr.shift();
+        //console.log(char, fultureArr.join(''))
+        parseHtml(char, fultureArr.join(''))
+    }
   }
 }
+//console.log(fultureArr.join(''))
 while(fultureArr.length > 0){
     let char = fultureArr.shift();
     //console.log(char, fultureArr.join(''))
@@ -129,5 +155,6 @@ while(fultureArr.length > 0){
 
 fs.writeFileSync('./_start_.log', start_tagarr.join('\n'))
 fs.writeFileSync('./_end_.log', end_tagarr.join('\n'))
+fs.writeFileSync('./_string_.log', stringarr.join('\n'))
 fs.writeFileSync('./_tagQueue_.json', JSON.stringify(handler.getQueue()))
 //console.log(start_tagarr)
