@@ -26,6 +26,7 @@ let start_tagname = ''
 let end_tagarr = []
 let end_tagname = ''
 
+let autoCloseTag = {'meta':1, 'link':1}
 
 let prevChar;
 let parseHtml = (char)=>{
@@ -64,7 +65,10 @@ let parseHtml = (char)=>{
         start_stop = false;
         inside_start_tag = false;
         start_tagarr.push(start_tagname);
-        handler.on({ename: 'start_tag', tagname: start_tagname});
+        handler.on({ename: 'start_tag', tagname: start_tagname});        
+        if(autoCloseTag[start_tagname.toLowerCase()]){
+            handler.on({ename: 'end_tag', tagname: start_tagname});
+        }
         jsonBuilder(start_tagname,  'start')
         current_tagname = start_tagname;
         start_tagname = ''
