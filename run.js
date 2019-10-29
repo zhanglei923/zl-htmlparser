@@ -1,7 +1,7 @@
 let fs = require('fs')
 let handler = require('./handler')
 
-var filename = './example.html'
+var filename = './example-simple.html'
 
 var fd = fs.openSync(filename, 'r');
 var bufferSize = 1;
@@ -66,9 +66,9 @@ let parseHtml = (char)=>{
         inside_start_tag = false;
         start_tagarr.push(start_tagname);
         handler.on({ename: 'start_tag', tagname: start_tagname});        
-        if(autoCloseTag[start_tagname.toLowerCase()]){
-            handler.on({ename: 'end_tag', tagname: start_tagname});
-        }
+        // if(autoCloseTag[start_tagname.toLowerCase()]){
+        //     handler.on({ename: 'end_tag', tagname: start_tagname});
+        // }
         jsonBuilder(start_tagname,  'start')
         current_tagname = start_tagname;
         start_tagname = ''
